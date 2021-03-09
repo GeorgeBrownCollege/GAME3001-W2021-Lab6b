@@ -31,6 +31,8 @@ void PlayScene::draw()
 void PlayScene::update()
 {
 	updateDisplayList();
+
+	m_CheckShipLOS(m_pTarget);
 }
 
 void PlayScene::clean()
@@ -82,10 +84,20 @@ void PlayScene::start()
 	m_pShip->getTransform()->position = glm::vec2(200.0f, 300.0f);
 	addChild(m_pShip, 2);
 
-	// add the ship to the scene as a start point
-	m_pObstacle = new Obstacle();
-	m_pObstacle->getTransform()->position = glm::vec2(400.0f, 300.0f);
-	addChild(m_pObstacle);
+	// add the Obstacle to the scene as a start point
+	m_pObstacle1 = new Obstacle();
+	m_pObstacle1->getTransform()->position = glm::vec2(400.0f, 300.0f);
+	addChild(m_pObstacle1);
+
+	// add the Obstacle to the scene as a start point
+	m_pObstacle2 = new Obstacle();
+	m_pObstacle2->getTransform()->position = glm::vec2(400.0f, 100.0f);
+	addChild(m_pObstacle2);
+
+	// add the Obstacle to the scene as a start point
+	m_pObstacle3 = new Obstacle();
+	m_pObstacle3->getTransform()->position = glm::vec2(600.0f, 500.0f);
+	addChild(m_pObstacle3);
 	
 	// added the target to the scene a goal
 	m_pTarget = new Target();
@@ -156,3 +168,30 @@ void PlayScene::GUI_Function()
 	ImGui::StyleColorsDark();
 }
 
+void PlayScene::m_CheckShipLOS(DisplayObject* target_object)
+{
+	// if ship to target distance is less than or equal to LOS Distance
+	auto ShipToTargetDistance = Util::distance(m_pShip->getTransform()->position, target_object->getTransform()->position);
+	if (ShipToTargetDistance <= m_pShip->getLOSDistance())
+	{
+		std::vector<DisplayObject*> contactList;
+		for (auto object : getDisplayList())
+		{
+			// check if object is farther than than the target
+			auto ShipToObjectDistance = Util::distance(m_pShip->getTransform()->position, object->getTransform()->position);
+
+			if (ShipToObjectDistance <= ShipToTargetDistance)
+			{
+				if ((object->getType() != m_pShip->getType()) && (object->getType() != target_object->getType()))
+				{
+					contactList.push_back(object);
+				}
+			}
+		}
+		contactList.push_back(target_object); // add the target to the end of the list
+		auto hasLOS = CollisionManager::LOSCheck(m_pShip->getTransform()->position,
+			m_pShip->getTransform()->position + m_pShip->getCurrentDirection() * m_pShip->getLOSDistance(), contactList, target_object);
+
+		m_pShip->setHasLOS(hasLOS);
+	}
+}
