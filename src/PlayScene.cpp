@@ -107,19 +107,27 @@ void PlayScene::GUI_Function()
 	
 	ImGui::Begin("GAME3001 - Lab 6", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar);
 
-
+	// allow ship rotation
+	static int angle;
+	if(ImGui::SliderInt("Ship Direction", &angle, -360, 360))
+	{
+		m_pShip->setCurrentHeading(angle);
+	}
+	
 	ImGui::Separator();
 
-
-	static int startPosition[] = { m_pShip->getTransform()->position.x, m_pShip->getTransform()->position.y };
-	if (ImGui::SliderInt2("Start Position", startPosition, 0, Config::COL_NUM - 1))
+	static int shipPosition[] = { m_pShip->getTransform()->position.x, m_pShip->getTransform()->position.y };
+	if (ImGui::SliderInt2("Ship Position", shipPosition, 0, 800))
 	{
+		m_pShip->getTransform()->position.x = shipPosition[0];
+		m_pShip->getTransform()->position.y = shipPosition[1];
 	}
 	
 	static int targetPosition[] = { m_pTarget->getTransform()->position.x, m_pTarget->getTransform()->position.y };
-	if(ImGui::SliderInt2("Target Position", targetPosition, 0, Config::COL_NUM - 1))
+	if(ImGui::SliderInt2("Target Position", targetPosition, 0, 800))
 	{
-
+		m_pTarget->getTransform()->position.x = targetPosition[0];
+		m_pTarget->getTransform()->position.y = targetPosition[1];
 	}
 	
 	ImGui::Separator();
